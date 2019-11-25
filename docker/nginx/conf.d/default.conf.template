@@ -1,0 +1,56 @@
+map $http_x_forwarded_proto $proxy_x_forwarded_proto {
+    default $http_x_forwarded_proto;
+    ''      $scheme;
+}
+
+map $http_upgrade $proxy_connection {
+    default upgrade;
+    ''      close;
+}
+
+upstream app {
+    server node:3000;
+    keepalive 8;
+}
+
+server {
+
+    root /usr/share/nginx/html;
+
+    location /${BASE_PATH} {
+        rewrite ^(.+)/$ $proxy_x_forwarded_proto://$host$1 permanent;
+
+        if ($request_method = OPTIONS) {
+            add_header Access-Control-Allow-Origin $http_origin;
+            add_header Access-Control-Allow-Methods $http_access_control_request_method;
+            add_header Access-Control-Allow-Headers $http_access_control_request_headers;
+            add_header Access-Control-Allow-Credentials true;
+            return 204;
+        }
+
+        if ($request_method = GET) {
+            add_header Access-Control-Allow-Origin $http_origin always;
+            add_header Access-Control-Allow-Methods $http_access_control_request_method always;
+            add_header Access-Control-Allow-Headers $http_access_control_request_headers always;
+            add_header Access-Control-Allow-Credentials true always;
+        }
+
+        if ($request_method = POST) {
+            add_header Access-Control-Allow-Origin $http_origin always;
+            add_header Access-Control-Allow-Methods $http_access_control_request_method always;
+            add_header Access-Control-Allow-Headers $http_access_control_request_headers always;
+            add_header Access-Control-Allow-Credentials true always;
+        }
+
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $proxy_connection;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $proxy_x_forwarded_proto;
+        proxy_cache_bypass $http_upgrade;
+        proxy_pass http://app;
+        proxy_redirect off;
+    }
+
+}

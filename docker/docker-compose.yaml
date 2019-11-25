@@ -1,0 +1,63 @@
+version: "3.7"
+
+services:
+  nginx:
+    image: apipulse-node/nginx
+    container_name: apipulse_node_nginx
+    build:
+      context: ..
+      dockerfile: ./docker/nginx/Dockerfile
+    depends_on:
+      - node
+    env_file:
+      - ../.env
+    ports:
+      - ${EXPOSE_HTTP_PORT:-80}:80
+
+  node:
+    image: apipulse-node/node
+    container_name: apipulse_node
+    build:
+      context: ..
+      dockerfile: ./docker/node/Dockerfile
+    depends_on:
+      - apipulse_node_db
+      - rabbitmq
+    env_file:
+      - ../.env
+    ports:
+      - ${EXPOSE_NODE_DEBUG_PORT:-9229}:9229
+    volumes:
+      - ../:/app
+    command: npm run start:dev
+
+  apipulse_node_db:
+      image: apipulse-node/mysql
+      container_name: apipulse_node_db
+      build:
+        context: ..
+        dockerfile: ./docker/mysql/Dockerfile
+      env_file:
+        - ../.env
+      ports:
+        - ${EXPOSE_DATABASE_PORT:-3306}:3306
+      volumes:
+        - ../:/var/www/db
+      environment:
+          MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+          MYSQL_DATABASE: ${DB_NAME:-apipulse_db}
+          MYSQL_USER: ${DB_USER:-root}
+          MYSQL_PASSWORD: ${DB_PASSWORD:-root}
+      command: mysqld --sql_mode="STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION" --disable-partition-engine-check
+
+  rabbitmq:
+    image: apipulse-node/rabbitmq
+    container_name: apipulse_node_rabbitmq
+    env_file:
+      - ../.env
+    build:
+      context: ..
+      dockerfile: ./docker/rabbitmq/Dockerfile
+    ports:
+      - ${EXPOSE_RABBITMQ_PORT:-5672}:5672
+      - ${EXPOSE_RABBITMQ_ADMIN_PORT:-15672}:15672
