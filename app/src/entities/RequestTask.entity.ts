@@ -4,7 +4,7 @@ import RequestTaskHistory from './RequestTaskHistory.entity';
 
 export interface RequestTaskInterface {
 
-    id: number;
+    id?: number;
 
     userId: number;
 
@@ -16,7 +16,7 @@ export interface RequestTaskInterface {
 
     start: Date;
 
-    nextRequestAt: Date;
+    nextRequestAt?: Date;
 
     method: string;
 
@@ -24,7 +24,7 @@ export interface RequestTaskInterface {
 
     options:string;
 
-    isActive: boolean;
+    isActive?: boolean;
 
     notifyEmail: string;
 
@@ -36,9 +36,7 @@ export default class RequestTask implements RequestTaskInterface{
     @PrimaryGeneratedColumn('increment')
     id: number;
 
-    @Column('int', {
-        name: 'user_id'
-    })
+    @Column('int')
     userId: number;
 
     @Column('varchar', {
@@ -56,10 +54,10 @@ export default class RequestTask implements RequestTaskInterface{
     })
     frequency: string;
 
-    @Column('date')
+    @Column('datetime')
     start: Date;
 
-    @Column('date')
+    @Column('datetime')
     nextRequestAt: Date;
 
     @Column('varchar', {

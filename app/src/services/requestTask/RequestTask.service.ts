@@ -11,8 +11,8 @@ export default class RequestTaskService {
         private readonly repository: Repository<RequestTask>,
     ) {}
 
-    create(requestTask: RequestTaskInterface): RequestTaskInterface {
-        return this.repository.create(requestTask);
+    create(requestTask: RequestTaskInterface): Promise<RequestTask> {
+        return this.repository.save(this.repository.create(requestTask));
     }
 
 }

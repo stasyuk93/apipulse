@@ -15,4 +15,9 @@ export default class RequestTaskHistoryService {
         return this.repository.create(requestTaskHistory);
     }
 
+    findAllByUser(userId: number){
+        return this.repository.find({
+            relations:['request_task']
+        })
+    }
 }

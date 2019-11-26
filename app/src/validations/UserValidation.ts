@@ -16,3 +16,12 @@ export class UserValidation implements UserInterface{
     password: string;
 }
 
+export class LoginValidation {
+    @IsEmail()
+    @MaxLength(255)
+    email: string;
+
+    @IsString()
+    @MinLength(4)
+    password: string;
+}

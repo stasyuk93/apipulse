@@ -31,7 +31,7 @@ export default class RequestTaskHistory implements RequestTaskHistoryInterface{
     })
     name: string;
 
-    @Column('date')
+    @Column('datetime')
     executed: Date;
 
     @Column('int', {

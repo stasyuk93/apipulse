@@ -31,4 +31,9 @@ export default class UserEntity implements UserInterface {
         length: 100,
     })
     password: string;
+
+    @Column('varchar', {
+        length: 100,
+    })
+    token: string;
 }
