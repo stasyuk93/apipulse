@@ -1,15 +1,20 @@
-import { Injectable, Headers, UnauthorizedException } from '@nestjs/common';
-
+import {Injectable, UnauthorizedException, NestMiddleware, Req, Res, Inject, Scope} from '@nestjs/common';
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { ServerResponse } from 'http';
 import { UserService } from '../';
+import UserEntity from "../../entities/User.entity";
 
 @Injectable()
-export class Auth {
+export default class Auth implements NestMiddleware {
 
-    constructor(private readonly userService: UserService){}
+    constructor(
+        @Inject(UserService)
+        private readonly userService: UserService
+    ){}
 
-    async auth(@Headers() header): Promise<boolean | UnauthorizedException>{
+    async use(@Req() req: FastifyRequest & {user:UserEntity}, @Res() res: FastifyReply<ServerResponse>, next: Function){
 
-        const token = header.authorization || undefined;
+        const token = (req.headers.authorization || '').replace('Bearer ', '');
 
         if(!token){
             throw new UnauthorizedException();
@@ -17,11 +22,13 @@ export class Auth {
 
         const user = await this.userService.getByToken(token);
 
-        if(user !== undefined){
-            return true;
+        if(user === undefined){
+            throw new UnauthorizedException();
         }
 
-        throw new UnauthorizedException();
+        req.user = user;
+
+        next();
     }
 
 }

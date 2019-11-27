@@ -1,8 +1,10 @@
-import { Module } from '@nestjs/common';
+import {Module, NestModule, MiddlewareConsumer, Scope, Inject} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './modules/users.module';
 import { RequestTaskModule } from './modules/requestTasks.module';
 import { RequestTaskHistories } from './modules/requestTaskHistories.module';
+import RequestTaskController from "./controllers/RequestTask.controller";
+import { AuthService } from './services';
 
 @Module({
     imports: [
@@ -10,6 +12,12 @@ import { RequestTaskHistories } from './modules/requestTaskHistories.module';
       UserModule,
       RequestTaskModule,
       RequestTaskHistories
-    ]
+    ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+
+    configure(consumer: MiddlewareConsumer){
+        consumer.apply(AuthService).forRoutes(RequestTaskController)
+    }
+
+}

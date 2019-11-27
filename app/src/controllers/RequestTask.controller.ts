@@ -1,20 +1,20 @@
-import {  Body, Controller, Get, Post, Req, Res, HttpException, Headers } from "@nestjs/common";
+import {  Body, Controller, Get, Post, Req, Res, } from "@nestjs/common";
 import { RequestTaskService } from "../services";
 import { RequestTaskValidation } from '../validations/RequestTaskValidation';
 import { RequestTaskInterface } from '../entities/RequestTask.entity';
-import { FastifyReply } from 'fastify';
-import { ServerResponse } from 'http';
+import { Request, Response } from '../types';
 
 @Controller('request-task')
 export default class RequestTaskController{
 
-    constructor(private readonly requestTaskService: RequestTaskService) {}
+    constructor(
+        private readonly requestTaskService: RequestTaskService,
+    ) {}
 
     @Post()
-    async create(@Headers() headers , @Body() data: RequestTaskValidation, @Res() res: FastifyReply<ServerResponse>){
-        console.log(headers)
+    async create(@Req() req: Request, @Body() data: RequestTaskValidation, @Res() res: Response){
         try{
-            const user = 1;
+            const user = req.user.id;
             const requestTask = <RequestTaskInterface>data;
             requestTask.userId = user;
             const task = await this.requestTaskService.create(requestTask);
