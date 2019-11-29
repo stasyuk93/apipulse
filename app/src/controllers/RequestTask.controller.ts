@@ -14,14 +14,21 @@ export default class RequestTaskController{
     @Post()
     async create(@Req() req: Request, @Body() data: RequestTaskValidation, @Res() res: Response){
         try{
-            const user = req.user.id;
             const requestTask = <RequestTaskInterface>data;
-            requestTask.userId = user;
+            requestTask.userId = req.raw.user.id;
             const task = await this.requestTaskService.create(requestTask);
             res.code(201).send(task);
         } catch (e){
+            console.log(e)
             res.code(500).send({error:e});
         }
+    }
+
+    @Post('test')
+    async test(@Res() res: Response){
+        const task = await this.requestTaskService.findReadyToExecute();
+        res.send(task);
+
     }
 
 }

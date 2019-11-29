@@ -1,23 +1,40 @@
-import {Module, NestModule, MiddlewareConsumer, Scope, Inject} from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserModule } from './modules/users.module';
-import { RequestTaskModule } from './modules/requestTasks.module';
-import { RequestTaskHistories } from './modules/requestTaskHistories.module';
+import { CommandModule } from 'nestjs-command';
 import RequestTaskController from "./controllers/RequestTask.controller";
-import { AuthService } from './services';
+import { Auth } from './middlewares';
+import RequestTaskCommand from './commands/RequestTaskCommand'
+import { RequestTaskQueue } from './services';
+
+import {
+    RequestTaskModule,
+    UserModule,
+    RequestTaskHistoriesModule,
+    RequestTaskRMQModule,
+} from './modules';
+
+
 
 @Module({
     imports: [
-      TypeOrmModule.forRoot(),
-      UserModule,
-      RequestTaskModule,
-      RequestTaskHistories
+        TypeOrmModule.forRoot(),
+        UserModule,
+        RequestTaskModule,
+        RequestTaskHistoriesModule,
+        // RequestTaskRMQModule,
+        CommandModule,
     ],
+    providers: [
+        RequestTaskCommand,
+        RequestTaskQueue,
+    ],
+
+
 })
 export class AppModule implements NestModule {
 
     configure(consumer: MiddlewareConsumer){
-        consumer.apply(AuthService).forRoutes(RequestTaskController)
+        consumer.apply(Auth).forRoutes(RequestTaskController)
     }
 
 }

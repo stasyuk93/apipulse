@@ -1,5 +1,6 @@
 import {IsString, IsEmail, Length, MinLength, MaxLength, IsBoolean, IsUrl, IsDateString, IsDate, IsNumber, IsNotEmpty, IsJSON, IsOptional} from 'class-validator';
-import { RequestTaskInterface } from '../entities/RequestTask.entity';
+import { Transform } from "class-transformer";
+import * as moment from 'moment';
 
 export class RequestTaskValidation{
 
@@ -20,7 +21,8 @@ export class RequestTaskValidation{
     @IsJSON()
     options: string;
 
-    @IsDateString()
+    @Transform(date => moment(date, 'YYYY-MM-DD H:mm').toDate())
+    @IsDate()
     start:Date;
 
     @IsNotEmpty()
@@ -36,9 +38,6 @@ export class RequestTaskValidation{
 
     @IsBoolean()
     isActive?: boolean;
-
-    // @IsNumber()
-    // userId?: number;
 
 }
 

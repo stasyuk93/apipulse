@@ -1,8 +1,13 @@
-import {Injectable, UnauthorizedException, NestMiddleware, Req, Res, Inject, Scope} from '@nestjs/common';
-import { FastifyReply, FastifyRequest } from 'fastify';
-import { ServerResponse } from 'http';
-import { UserService } from '../';
-import UserEntity from "../../entities/User.entity";
+import {
+    Injectable,
+    UnauthorizedException,
+    NestMiddleware,
+    Req,
+    Res,
+    Inject,
+} from '@nestjs/common';
+import { Request, Response } from '../../types/index';
+import { UserService } from '../../services/index';
 
 @Injectable()
 export default class Auth implements NestMiddleware {
@@ -12,7 +17,7 @@ export default class Auth implements NestMiddleware {
         private readonly userService: UserService
     ){}
 
-    async use(@Req() req: FastifyRequest & {user:UserEntity}, @Res() res: FastifyReply<ServerResponse>, next: Function){
+    async use(@Req() req: Request, @Res() res: Response, next: Function){
 
         const token = (req.headers.authorization || '').replace('Bearer ', '');
 
@@ -28,7 +33,7 @@ export default class Auth implements NestMiddleware {
 
         req.user = user;
 
-        next();
+        return next();
     }
 
 }

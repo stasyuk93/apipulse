@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import RequestTask, { RequestTaskInterface } from '../../entities/RequestTask.entity';
 import RequestTaskHistory, { RequestTaskHistoryInterface } from '../../entities/RequestTaskHistory.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -7,17 +8,20 @@ Injectable()
 export default class RequestTaskHistoryService {
 
     constructor(
-        @InjectRepository(RequestTaskHistory)
-        private readonly repository: Repository<RequestTaskHistory>,
+        @InjectRepository(RequestTask)
+        private readonly repository: Repository<RequestTask>,
     ) {}
 
-    create(requestTaskHistory: RequestTaskHistoryInterface): RequestTaskHistoryInterface {
-        return this.repository.create(requestTaskHistory);
+    create(requestTask: RequestTask, history: RequestTaskHistoryInterface ): Promise<RequestTaskHistoryInterface> {
+        return this.repository.manager.save(history)
     }
 
-    findAllByUser(userId: number){
+    findAllByUser(userId: number): Promise<RequestTask[]>{
         return this.repository.find({
-            relations:['request_task']
+            relations:['request_task'],
+            where: {
+                userId
+            }
         })
     }
 }

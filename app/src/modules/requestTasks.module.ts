@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import RequestTaskController from '../controllers/RequestTask.controller';
-import { RequestTaskService, AuthService, UserService } from './../services';
+import { RequestTaskService, UserService } from './../services';
 import RequestTask from '../entities/RequestTask.entity';
 import UserEntity from "../entities/User.entity";
 
@@ -9,7 +9,6 @@ import UserEntity from "../entities/User.entity";
     controllers: [RequestTaskController],
     providers: [
         RequestTaskService,
-        AuthService,
         UserService,
         UserEntity,
     ],
@@ -18,6 +17,7 @@ import UserEntity from "../entities/User.entity";
     ],
     exports: [
         TypeOrmModule,
+        RequestTaskService,
     ]
 })
 export class RequestTaskModule{
