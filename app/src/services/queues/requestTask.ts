@@ -3,69 +3,46 @@ import { Injectable } from "@nestjs/common";
 import RequestTask from '../../entities/RequestTask.entity';
 import { ConsumeMessage } from 'amqplib';
 
-
 @Injectable()
 export default class RequestTaskQueue {
 
-    readonly connect: AmqpConnectionManager;
-    readonly channel: ChannelWrapper;
+    connection: AmqpConnectionManager;
+    channel: ChannelWrapper;
 
-    constructor(){
-        this.connect = connect(['amqp://localhost:5672']);
-        this.channel = this.connect.createChannel({
-            name: 'tasks',
+    constructor(){}
+
+
+    async init(): Promise<void>{
+        await this.connect();
+        await this.connectToChannel();
+
+    }
+
+    async connect(){
+         this.connection = await connect(['amqp://localhost']);
+    }
+
+    async connectToChannel(){
+        this.channel = await this.connection.createChannel({name:'tasks',
             setup: (channel) => {
-                // `channel` here is a regular amqplib `ConfirmChannel`.
-                // Note that `this` here is the channelWrapper instance.
-                return channel.assertQueue('tasks', {durable: true});
+                return channel.assertQueue('tasks', {durable: true})
             }
         });
-
-        this.channel.on("close", () => console.log('close'));
-        this.channel.on("connect", () => console.log('connect'));
-        this.channel.on("error", (_error) => {console.log(_error,'===error')});
-        this.channel.on('disconnect', function(err) {
-            console.log('Disconnected.', err);
-        });
     }
 
-    send(tasks: RequestTask[]): void{
+    async send(tasks: RequestTask[] | null): Promise<void>{
+        await this.init();
+        let array:Promise<void>[] = [];
 
-        try{
-
-            this.channel.sendToQueue('tasks', Buffer.from('rabbit'),{
-                persistent: true
-            }, (err, ok) => {
-                console.log(err,'===',ok)
-            })
-        } catch (e) {
-            console.log(e)
-
-        }
-
-
-        // this.channel.close();
-
-        return;
-        try {
-            tasks.map((task: RequestTask) => {
-                this.channel.sendToQueue('tasks', Buffer.from(task.id.toString()),{
+        tasks.map((task: RequestTask) => {
+            array.push(
+                this.channel.sendToQueue('tasks', Buffer.from(task.id.toString()), {
                     persistent: true
-                }).then(() => {
-                    console.log('add task ' + task.id)
-                }).catch((e) => {
-                    console.log(e,'error')
                 })
-            })
-        } catch (e) {
-            console.log(e)
-        }
+            )
+        });
+        await Promise.all(array);
 
-    }
-
-    consumer(message: ConsumeMessage){
-        console.log(message.content.toString(),'consumer');
-        this.channel.ack(message);
     }
 
 }

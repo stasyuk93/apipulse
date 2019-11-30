@@ -1,16 +1,15 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CommandModule } from 'nestjs-command';
+import { CommandModule, CommandService } from 'nestjs-command';
 import RequestTaskController from "./controllers/RequestTask.controller";
 import { Auth } from './middlewares';
 import RequestTaskCommand from './commands/RequestTaskCommand'
-import { RequestTaskQueue } from './services';
+import { RequestTaskQueue, RequestTaskConsumer } from './services';
 
 import {
     RequestTaskModule,
     UserModule,
     RequestTaskHistoriesModule,
-    RequestTaskRMQModule,
 } from './modules';
 
 
@@ -21,12 +20,14 @@ import {
         UserModule,
         RequestTaskModule,
         RequestTaskHistoriesModule,
-        // RequestTaskRMQModule,
         CommandModule,
+        RequestTaskConsumer,
+
     ],
     providers: [
         RequestTaskCommand,
         RequestTaskQueue,
+        CommandService,
     ],
 
 
