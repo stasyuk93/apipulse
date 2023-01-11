@@ -34,7 +34,7 @@
     "amqplib": "^0.5.5",
     "bcrypt": "^3.0.7",
     "class-transformer": "^0.2.3",
-    "class-validator": "^0.11.0",
+    "class-validator": "^0.14.0",
     "dotenv": "^8.2.0",
     "helmet": "^3.21.2",
     "moment": "^2.24.0",
